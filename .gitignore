@@ -34,7 +34,6 @@ logs/*
 x64
 x64/*
 */x64/*
-*.binvox
 
 volumetric_data/car/**
 volumetric_data/chair/**
