@@ -35,7 +35,7 @@ class net_G(torch.nn.Module):
             torch.nn.ConvTranspose3d(self.f_dim, 1, kernel_size=4, stride=2, bias=self.bias, padding=(1, 1, 1)),
             torch.nn.Sigmoid()
             # torch.nn.Tanh()
-        )#.to('cuda:4')
+        )
 
     def conv_layer(self, input_dim, output_dim, kernel_size=4, stride=2, padding=(1,1,1), bias=False):
         layer = torch.nn.Sequential(
@@ -53,19 +53,16 @@ class net_G(torch.nn.Module):
         # print("G2",out.size())  # torch.Size([batch_size, f_dim*16, 4, 4, 4])
         if self.cube_len == 128:
             out = self.addlayer(out)
-        out = self.layer2(out)#.to('cuda:1'）
+
+        out = self.layer2(out)
         # print("G3",out.size())  # torch.Size([batch_size, f_dim*8, 8, 8, 8])
-        out = self.layer3(out)#.to('cuda:2'）
+        out = self.layer3(out)
         # print("G4",out.size())  # torch.Size([batch_size, f_dim*4, 16, 16, 16])
-        out = self.layer4(out) #.to('cuda:3'）
+        out = self.layer4(out)
         # print("G5",out.size())  # torch.Size([batch_size, f_dim*2, 32, 32, 32])
-        out = self.layer5(out)#.to('cuda:4'）
+        out = self.layer5(out)
         # print("G6",out.size())  # torch.Size([batch_size, f_dim, 64, 64, 64])
         out = torch.squeeze(out)
-        # out =  self.layer5(self.layer4(self.layer3(self.layer2(self.layer1(x.view(-1, self.z_dim, 1, 1, 1)).to('cuda:1')).to('cuda:2')).to('cuda:3')).to('cuda:4'))
-        # if self.cube_len == 128:
-        #      out = self.layer5(self.layer4(self.layer3(self.layer2(self.addlayer(x.view(-1, self.z_dim, 1, 1, 1)).to('cuda:1')).to('cuda:2')).to('cuda:3')).to('cuda:4'))
-        # out = torch.squeeze(out)
         return out
 
 

@@ -8,6 +8,8 @@
 
 * This is a very simple-to-use and simple-to-understand pytorch implementation of part of the [paper](https://arxiv.org/abs/1610.07584) "Learning a Probabilistic Latent Space of Object Shapes via 3D Generative-Adversarial Modeling".
 
+Note that for training, your batch_size has to be at least 2
+
 The code is heavily based on [Simple 3D-GAN-PyTorch](https://github.com/xchhuang/simple-pytorch-3dgan),[3DGAN-Pytorch](https://github.com/rimchang/3DGAN-Pytorch) and [tf-3dgan](https://github.com/meetshah1995/tf-3dgan) and thanks for them.
 
 The major pipeline would be the same as Simple 3D-GAN-PyTorch, except for a couple of major modifications:

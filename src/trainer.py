@@ -81,10 +81,18 @@ def trainer(args):
     dset_len = {"train": len(train_dsets)}
     dset_loaders = {"train": train_dset_loaders}
     # print (dset_len["train"])
-
+    
     # model define
     D = net_D(args)
     G = net_G(args)
+
+    
+    # Make Customization for multiple GPUs
+    if torch.cuda.device_count() > 1:
+        print("Let's use", torch.cuda.device_count(), "GPUs!")
+        # dim = 0 [30, xxx] -> [10, ...], [10, ...], [10, ...] on 3 GPUs
+        D = nn.DataParallel(D)
+        G = nn.DataParallel(G)
 
     # print total number of parameters in a model
     # x = sum(p.numel() for p in G.parameters() if p.requires_grad)
@@ -192,6 +200,8 @@ def trainer(args):
                 # print (fake.size(), X.size())
 
                 # recon_g_loss = criterion_D(fake, X)
+                # print("size of fake",fake.size())
+                # print("size of X",X.size())
                 recon_g_loss = criterion_G(fake, X)
                 # g_loss = recon_g_loss + params.adv_weight * adv_g_loss
                 g_loss = adv_g_loss
