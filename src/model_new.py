@@ -1,5 +1,6 @@
 import torch
 import params
+import math
 
 '''
 
@@ -20,22 +21,39 @@ class net_G(torch.nn.Module):
         self.bias = params.bias
         self.z_dim = params.z_dim
         self.f_dim = args.cube_len
+        self.n_layers = int(math.log2(self.f_dim)) - 1 # 2^6=64, so 5 for f_dim 64, 6 for f_dim 128
+        self.max_feature = math.pow(2, self.n_layers - 2) # 8 for f_dim 64, 16 for f_dim 128
+        self.layers = []
+                
+        for i in range(0, self.n_layers):
+            if i==0:
+                layer = self.conv_layer(self.z_dim, self.max_feature, kernel_size=4, stride=2, padding=(0,0,0), bias=self.bias)
+            elif i==self.n_layer -1:
+                layer = torch.nn.Sequential(
+                    torch.nn.ConvTranspose3d(self.f_dim, 1, kernel_size=4, stride=2, bias=self.bias, padding=(1, 1, 1)),
+                    torch.nn.Sigmoid()
+                    # torch.nn.Tanh()
+                )
+            else:
+                cur_pow = math.pow(2, self.n_layers - 1 - i) # for 128, self.n_layers=6, then get 2^4,2^3...
+                layer = self.conv_layer(cur_pow, int(cur_pow/2), kernel_size=4, stride=2, padding=(1, 1, 1), bias=self.bias)
+            self.layers.append(layer)
 
-        padd = (0, 0, 0)
-        self.layer1 = self.conv_layer(self.z_dim, self.f_dim*8, kernel_size=4, stride=2, padding=padd, bias=self.bias)
-        if self.cube_len == 128:
-            self.layer1 = self.conv_layer(self.z_dim, self.f_dim*16, kernel_size=4, stride=2, padding=padd, bias=self.bias)
-            self.addlayer = self.conv_layer(self.f_dim*16, self.f_dim*8, kernel_size=4, stride=2, padding=(1, 1, 1), bias=self.bias)
+
+        # self.layer1 = self.conv_layer(self.z_dim, self.f_dim*8, kernel_size=4, stride=2, padding=padd, bias=self.bias)
+        # if self.cube_len == 128:
+        #     self.layer1 = self.conv_layer(self.z_dim, self.f_dim*16, kernel_size=4, stride=2, padding=padd, bias=self.bias)
+        #     self.addlayer = self.conv_layer(self.f_dim*16, self.f_dim*8, kernel_size=4, stride=2, padding=(1, 1, 1), bias=self.bias)
         
-        self.layer2 = self.conv_layer(self.f_dim*8, self.f_dim*4, kernel_size=4, stride=2, padding=(1, 1, 1), bias=self.bias)
-        self.layer3 = self.conv_layer(self.f_dim*4, self.f_dim*2, kernel_size=4, stride=2, padding=(1, 1, 1), bias=self.bias)
-        self.layer4 = self.conv_layer(self.f_dim*2, self.f_dim, kernel_size=4, stride=2, padding=(1, 1, 1), bias=self.bias)
+        # self.layer2 = self.conv_layer(self.f_dim*8, self.f_dim*4, kernel_size=4, stride=2, padding=(1, 1, 1), bias=self.bias)
+        # self.layer3 = self.conv_layer(self.f_dim*4, self.f_dim*2, kernel_size=4, stride=2, padding=(1, 1, 1), bias=self.bias)
+        # self.layer4 = self.conv_layer(self.f_dim*2, self.f_dim, kernel_size=4, stride=2, padding=(1, 1, 1), bias=self.bias)
         
-        self.layer5 = torch.nn.Sequential(
-            torch.nn.ConvTranspose3d(self.f_dim, 1, kernel_size=4, stride=2, bias=self.bias, padding=(1, 1, 1)),
-            torch.nn.Sigmoid()
-            # torch.nn.Tanh()
-        )
+        # self.layer5 = torch.nn.Sequential(
+        #     torch.nn.ConvTranspose3d(self.f_dim, 1, kernel_size=4, stride=2, bias=self.bias, padding=(1, 1, 1)),
+        #     torch.nn.Sigmoid()
+        #     # torch.nn.Tanh()
+        # )
 
     def conv_layer(self, input_dim, output_dim, kernel_size=4, stride=2, padding=(1,1,1), bias=False):
         layer = torch.nn.Sequential(

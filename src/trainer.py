@@ -1,4 +1,3 @@
-
 '''
 trainer.py
 
@@ -93,6 +92,8 @@ def trainer(args):
         # dim = 0 [30, xxx] -> [10, ...], [10, ...], [10, ...] on 3 GPUs
         D = nn.DataParallel(D)
         G = nn.DataParallel(G)
+#         D = nn.DistributedDataParallel(D)
+#         G = nn.DistributedDataParallel(G)
 
     # print total number of parameters in a model
     # x = sum(p.numel() for p in G.parameters() if p.requires_grad)
@@ -155,9 +156,6 @@ def trainer(args):
 
                 # ============= Train the discriminator =============#
                 d_real = D(X)
-
-                
-
                 fake = G(Z)
                 d_fake = D(fake)
 
@@ -196,12 +194,12 @@ def trainer(args):
                 fake = G(Z) # generated fake: 0-1, X: 0/1
                 d_fake = D(fake)
 
-                adv_g_loss = criterion_D(d_fake, real_labels)#.to('cuda:4')
+                adv_g_loss = criterion_D(d_fake, real_labels)
                 # print (fake.size(), X.size())
 
-                # recon_g_loss = criterion_D(fake, X)
-                # print("size of fake",fake.size())
-                # print("size of X",X.size())
+                recon_g_loss = criterion_D(fake, X)
+#                 print("size of fake",fake.size())
+#                 print("size of X",X.size())
                 recon_g_loss = criterion_G(fake, X)
                 # g_loss = recon_g_loss + params.adv_weight * adv_g_loss
                 g_loss = adv_g_loss
@@ -265,8 +263,3 @@ def trainer(args):
 
                 # print (samples.shape)
                 # image_saved_path = '../images'
-
-
-
-
-
